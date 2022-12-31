@@ -1,6 +1,6 @@
 # S.T.A.L.K.E.R 2 HUD for Garry's Mod
 
-The project was written under 4 hours.
+The HUD from upcoming game S.T.A.L.K.E.R. 2: Heart of Chornobyl for Garry's Mod
 
 ## Authors
 

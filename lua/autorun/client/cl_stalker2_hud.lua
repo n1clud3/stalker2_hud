@@ -2,11 +2,17 @@
 
 local addonName = 'Stalker2 HUD'
 
+-- definitions for performance
 local math_floor = math.floor
 local math_min = math.min
 local ScrW = ScrW
 local ScrH = ScrH
 local hook = hook
+
+local surface_SetDrawColor = surface.SetDrawColor
+local surface_DrawRect = surface.DrawRect
+local FrameTime = FrameTime
+local Lerp = Lerp
 
 local scrW, scrH = ScrW(), ScrH()
 local screenPercentage = math_min( scrW, scrH ) / 100
@@ -25,7 +31,6 @@ end
 
 -- La Config 👍
 -- In Scale Percents
---local hudWidth = 16.9
 local hudOffset = 5
 
 local armorHeight = 0.6
@@ -37,14 +42,9 @@ local hudWidth = 182
 
 -- Colors :)
 local alpha = 220
-local bg = Color( 20, 20, 20, alpha )
-local health = Color( 190, 44, 54, alpha )
-local armor = Color( 60, 155, 155, alpha )
-
-local surface_SetDrawColor = surface.SetDrawColor
-local surface_DrawRect = surface.DrawRect
-local FrameTime = FrameTime
-local Lerp = Lerp
+local bgColor = Color( 20, 20, 20, alpha )
+local healthColor = Color( 190, 44, 54, alpha )
+local armorColor = Color( 60, 155, 155, alpha )
 
 hook.Add('RenderScene', addonName, function()
     hook.Remove( 'RenderScene', addonName )
@@ -58,14 +58,14 @@ hook.Add('RenderScene', addonName, function()
         local hy = scrH - offset
 
         -- Health BG
-        surface_SetDrawColor( bg )
+        surface_SetDrawColor( bgColor )
         surface_DrawRect( offset, hy, hw, hh )
 
         plyHealth = Lerp( FrameTime() * 10, plyHealth, (ply:Health() / ply:GetMaxHealth()) * hw )
         plyArmor = Lerp( FrameTime() * 10, plyArmor, (ply:Armor() / ply:GetMaxHealth()) * hw )
 
         -- Health FG
-        surface_SetDrawColor( health )
+        surface_SetDrawColor( healthColor )
         surface_DrawRect( offset + 1, hy + 1, plyHealth - 1, hh - 2 )
 
         local ah = ScreenPercentage( armorHeight )
@@ -73,11 +73,11 @@ hook.Add('RenderScene', addonName, function()
 
         if plyArmor < 1 then return end
         -- Armor BG
-        surface_SetDrawColor( bg )
+        surface_SetDrawColor( bgColor )
         surface_DrawRect( offset, ay, hw, ah )
 
         -- Armor FG
-        surface_SetDrawColor( armor )
+        surface_SetDrawColor( armorColor )
         surface_DrawRect( offset + 1, ay + 1, plyArmor - 1, ah - 2 )
     end)
 
