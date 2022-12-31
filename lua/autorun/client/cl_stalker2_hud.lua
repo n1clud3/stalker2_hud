@@ -1,5 +1,5 @@
 -- by n1clud3 and PrikolMen:-b
-local addonName = 'Stalker2 HUD'
+local addonName = "Stalker2 HUD"
 
 -- definitions for performance
 local math_floor = math.floor
@@ -14,7 +14,7 @@ local Lerp = Lerp
 
 local scrW, scrH = ScrW(), ScrH()
 local screenPercentage = math_min( scrW, scrH ) / 100
-hook.Add('OnScreenSizeChanged', addonName, function()
+hook.Add("OnScreenSizeChanged", addonName, function()
     scrW, scrH = ScrW(), ScrH()
     screenPercentage = math_min( scrW, scrH ) / 100
 end)
@@ -26,6 +26,8 @@ local function ScreenPercentage( percentage )
 
     return screenPercentage
 end
+
+local enableHud = CreateClientConVar("cl_stalker2hud_enable", "1", true, false, "Enables S.T.A.L.K.E.R. 2 HUD", 0, 1)
 
 -- La Config 👍
 -- In Scale Percents
@@ -45,13 +47,14 @@ local healthBetweenColor = Color( 100, 44, 54, 110 )
 local armorColor = Color( 60, 155, 155, 220 )
 local armorBetweenColor = Color( 20, 70, 70, 110 )
 
-hook.Add('RenderScene', addonName, function()
-    hook.Remove( 'RenderScene', addonName )
-
+hook.Add("RenderScene", addonName, function()
+    hook.Remove( "RenderScene", addonName )
+    
     local plyHealth, plyArmor = 0, 0
     local ply = LocalPlayer()
 
-    hook.Add('HUDPaint', addonName, function()
+    hook.Add("HUDPaint", addonName, function()
+        if not enableHud:GetBool() then return end
         local hw, hh = hudWidth, ScreenPercentage( healthHeight )
         local offset = ScreenPercentage( hudOffset )
         local hy = scrH - offset
@@ -88,18 +91,21 @@ hook.Add('RenderScene', addonName, function()
         surface_DrawRect( offset + 2, ay + 2, plyArmor - 3, ah - 4 )
     end)
 
+    if not enableHud:GetBool() then
+        hook.Remove("HUDPaint", addonName)
+    end
 end)
 
 -- Disable default hud
 do
 
     local hideElements = {
-        ['CHudHealth'] = true,
-        ['CHudBattery'] = true
+        ["CHudHealth"] = true,
+        ["CHudBattery"] = true
     }
 
-    hook.Add('HUDShouldDraw', addonName, function( name )
-        if hideElements[ name ] then
+    hook.Add("HUDShouldDraw", addonName, function( name )
+        if hideElements[ name ] and enableHud:GetBool() then
             return false
         end
     end)
