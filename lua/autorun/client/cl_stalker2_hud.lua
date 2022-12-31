@@ -25,14 +25,15 @@ end
 
 -- La Config 👍
 -- In Scale Percents
-local hudWidth = 25
+--local hudWidth = 16.9
 local hudOffset = 5
 
 local armorHeight = 0.6
 local healthHeight = 1.2
 
 -- In Pixels
-local healthArmorOffset = 3
+local healthArmorOffset = 4
+local hudWidth = 182
 
 -- Colors :)
 local alpha = 220
@@ -52,7 +53,7 @@ hook.Add('RenderScene', addonName, function()
     local ply = LocalPlayer()
 
     hook.Add('HUDPaint', addonName, function()
-        local hw, hh = ScreenPercentage( hudWidth ), ScreenPercentage( healthHeight )
+        local hw, hh = hudWidth, ScreenPercentage( healthHeight )
         local offset = ScreenPercentage( hudOffset )
         local hy = scrH - offset
 
@@ -70,6 +71,7 @@ hook.Add('RenderScene', addonName, function()
         local ah = ScreenPercentage( armorHeight )
         local ay = hy - ah - healthArmorOffset
 
+        if plyArmor < 1 then return end
         -- Armor BG
         surface_SetDrawColor( bg )
         surface_DrawRect( offset, ay, hw, ah )
