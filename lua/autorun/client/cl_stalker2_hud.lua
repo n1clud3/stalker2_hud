@@ -11,6 +11,7 @@ local surface_SetDrawColor = surface.SetDrawColor
 local surface_DrawRect = surface.DrawRect
 local FrameTime = FrameTime
 local Lerp = Lerp
+local math_Clamp = math.Clamp
 
 local scrW, scrH = ScrW(), ScrH()
 local screenPercentage = math_min( scrW, scrH ) / 100
@@ -18,6 +19,12 @@ hook.Add("OnScreenSizeChanged", addonName, function()
     scrW, scrH = ScrW(), ScrH()
     screenPercentage = math_min( scrW, scrH ) / 100
 end)
+
+surface.CreateFont("Stalker2HUDFont", {
+    font = "Helvetica",
+    size = 12,
+    antialias = true
+})
 
 local function ScreenPercentage( percentage )
     if (percentage) then
@@ -33,10 +40,10 @@ local enableHud = CreateClientConVar("cl_stalker2hud_enable", "1", true, false, 
 -- In Scale Percents
 local hudOffset = 5
 
-local armorHeight = 0.6
-local healthHeight = 1.2
 
 -- In Pixels
+local armorHeight = 6
+local healthHeight = 12
 local healthArmorOffset = 4
 local hudWidth = 182
 
@@ -49,13 +56,13 @@ local armorBetweenColor = Color( 20, 70, 70, 110 )
 
 hook.Add("RenderScene", addonName, function()
     hook.Remove( "RenderScene", addonName )
-    
+
     local plyHealth, plyArmor = 0, 0
     local ply = LocalPlayer()
 
     hook.Add("HUDPaint", addonName, function()
         if not enableHud:GetBool() then return end
-        local hw, hh = hudWidth, ScreenPercentage( healthHeight )
+        local hw, hh = hudWidth, healthHeight
         local offset = ScreenPercentage( hudOffset )
         local hy = scrH - offset
 
@@ -63,8 +70,8 @@ hook.Add("RenderScene", addonName, function()
         surface_SetDrawColor( bgColor )
         surface_DrawRect( offset, hy, hw, hh )
 
-        plyHealth = Lerp( FrameTime() * 10, plyHealth, (ply:Health() / ply:GetMaxHealth()) * hw )
-        plyArmor = Lerp( FrameTime() * 10, plyArmor, (ply:Armor() / ply:GetMaxHealth()) * hw )
+        plyHealth = Lerp( FrameTime() * 10, plyHealth, math_Clamp(ply:Health() / ply:GetMaxHealth(), 0.0, 1.0) * hw )
+        plyArmor = Lerp( FrameTime() * 10, plyArmor, math_Clamp(ply:Armor() / ply:GetMaxArmor(), 0.0, 1.0) * hw )
 
         -- Health BetweenColor
         surface_SetDrawColor( healthBetweenColor )
@@ -74,7 +81,14 @@ hook.Add("RenderScene", addonName, function()
         surface_SetDrawColor( healthColor )
         surface_DrawRect( offset + 2, hy + 2, plyHealth - 3, hh - 4 )
 
-        local ah = ScreenPercentage( armorHeight )
+        if ply:Health() > ply:GetMaxHealth() then
+            surface.SetFont("Stalker2HUDFont")
+            surface.SetTextColor(255, 255, 255)
+            surface.SetTextPos(offset + hw + 4, hy + hh - 12)
+            surface.DrawText("+" .. ply:Health() - ply:GetMaxHealth())
+        end
+
+        local ah = armorHeight
         local ay = hy - ah - healthArmorOffset
 
         if plyArmor < 1 then return end -- don't draw armor bar if player has no armor ＼（〇_ｏ）／
@@ -82,13 +96,20 @@ hook.Add("RenderScene", addonName, function()
         surface_SetDrawColor( bgColor )
         surface_DrawRect( offset, ay, hw, ah )
 
-        -- Health BetweenColor
+        -- Armor BetweenColor
         surface_SetDrawColor( armorBetweenColor )
         surface_DrawRect( offset + 1, ay + 1, plyArmor - 1, ah - 2 )
 
         -- Armor FG
         surface_SetDrawColor( armorColor )
         surface_DrawRect( offset + 2, ay + 2, plyArmor - 3, ah - 4 )
+
+        if ply:Armor() > ply:GetMaxArmor() then
+            surface.SetFont("Stalker2HUDFont")
+            surface.SetTextColor(255, 255, 255)
+            surface.SetTextPos(offset + hw + 4, hy + hh - 25)
+            surface.DrawText("+" .. ply:Armor() - ply:GetMaxArmor())
+        end
     end)
 
     if not enableHud:GetBool() then
